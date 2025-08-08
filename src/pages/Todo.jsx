@@ -1,10 +1,21 @@
 import { useEffect, useState } from "react";
 import css from "./Todo.module.css";
 import { useDispatch, useSelector } from "react-redux";
-import { addTodo, deleteTodo, getTodos, updateTodo } from "../redux/todoSlice";
+import {
+  addTodo,
+  deleteTodo,
+  getTodos,
+  selectTodos,
+  selectTodosStatus,
+  updateTodo,
+} from "../redux/todoSlice";
+import TodoFilters from "../components/TodoFilters";
+import { selectFilterTodos } from "../redux/filterSlice";
 
 const Todo = () => {
-  const todoList = useSelector((state) => state.todos.data);
+  const todoList = useSelector(selectFilterTodos);
+
+  const todosStatus = useSelector(selectTodosStatus);
 
   const [text, setText] = useState("");
 
@@ -18,8 +29,8 @@ const Todo = () => {
     dispatch(addTodo(text));
   };
 
-  const handleUpdateTodo = (id) => {
-    dispatch(updateTodo(id));
+  const handleUpdateTodo = (todo) => {
+    dispatch(updateTodo(todo));
   };
 
   const handleDeleteTodo = (id) => {
@@ -30,6 +41,7 @@ const Todo = () => {
     <>
       <div className={css.todoContainer}>
         <h2>Yapılacaklar Listesi</h2>
+        <TodoFilters />
         <div className={css.inputGroup}>
           <input
             type="text"
@@ -45,6 +57,7 @@ const Todo = () => {
           </button>
         </div>
 
+        {todosStatus === "bekle" && <p>Yükleniyor...</p>}
         <ul className={css.todoList}>
           {todoList.map((todo) => (
             <li
@@ -55,7 +68,10 @@ const Todo = () => {
               <div className={css.buttons}>
                 <button
                   onClick={() => {
-                    handleUpdateTodo(todo.id);
+                    handleUpdateTodo({
+                      id: todo.id,
+                      tamamlandi: !todo.tamamlandi,
+                    });
                   }}
                 >
                   {todo.tamamlandi ? "Geri Al" : "Tamamla"}
